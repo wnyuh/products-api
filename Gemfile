@@ -8,7 +8,7 @@ gem "sqlite3", ">= 2.1"
 gem "puma", ">= 5.0"
 # json 3.x chỉ nhận keyword args, ActiveSupport 8.1.x còn gọi JSON.parse(src, opts)
 # với hash vị trí nên mọi request JSON đều 400. Gỡ ràng buộc khi Rails hỗ trợ json 3.
-gem "json", "< 3"
+gem "json", "< 4"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 # gem "jbuilder"
 
