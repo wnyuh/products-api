@@ -1,0 +1,102 @@
+openapi: 3.0.1
+info:
+  title: iPhone API
+  version: v1
+paths:
+  /iphones:
+    get:
+      summary: Lấy danh sách iPhone
+      tags:
+        - Iphones
+      responses:
+        '200':
+          description: Thành công
+    post:
+      summary: Tạo iPhone mới
+      tags:
+        - Iphones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iphone:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: iPhone 15 Pro
+                    storage:
+                      type: integer
+                      example: 256
+                    price:
+                      type: number
+                      example: 27990000
+                    color:
+                      type: string
+                      example: Black Titanium
+      responses:
+        '201':
+          description: Tạo thành công
+  /iphones/{id}:
+    get:
+      summary: Xem một iPhone
+      tags:
+        - Iphones
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Thành công
+        '404':
+          description: Không tìm thấy
+    put:
+      summary: Cập nhật iPhone
+      tags:
+        - Iphones
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iphone:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    storage:
+                      type: integer
+                    price:
+                      type: number
+                    color:
+                      type: string
+      responses:
+        '200':
+          description: Cập nhật thành công
+    delete:
+      summary: Xóa iPhone
+      tags:
+        - Iphones
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Xóa thành công
