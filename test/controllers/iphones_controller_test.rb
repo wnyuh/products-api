@@ -35,4 +35,31 @@ class IphonesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
   end
+
+  test "create với dữ liệu sai trả 422 và không tạo bản ghi" do
+    assert_no_difference("Iphone.count") do
+      post iphones_url, params: { iphone: { name: "", storage: "256GB", price: "abc" } }, as: :json
+    end
+
+    assert_response :unprocessable_content
+    errors = response.parsed_body
+    assert errors.key?("name")
+    assert errors.key?("storage")
+    assert errors.key?("price")
+  end
+
+  test "create với storage vượt giới hạn trả 422 chứ không phải 500" do
+    assert_no_difference("Iphone.count") do
+      post iphones_url, params: { iphone: { name: "x", storage: 10**30, price: 1 } }, as: :json
+    end
+
+    assert_response :unprocessable_content
+  end
+
+  test "update với dữ liệu sai trả 422 và giữ nguyên bản ghi" do
+    patch iphone_url(@iphone), params: { iphone: { price: -5 } }, as: :json
+
+    assert_response :unprocessable_content
+    assert_equal 9.99, @iphone.reload.price.to_f
+  end
 end
