@@ -39,4 +39,18 @@ class IphoneTest < ActiveSupport::TestCase
     assert Iphone.new(valid_attrs.merge(price: 0)).valid?
     assert Iphone.new(valid_attrs.merge(price: "9999999999.99")).valid?
   end
+
+  test "DB từ chối name, storage, price NULL dù bỏ qua validation" do
+    %i[ name storage price ].each do |column|
+      assert_raises(ActiveRecord::NotNullViolation, "#{column} NULL phải bị DB từ chối") do
+        Iphone.new(valid_attrs.merge(column => nil)).save!(validate: false)
+      end
+    end
+  end
+
+  test "price lưu theo scale 2" do
+    iphone = Iphone.create!(valid_attrs.merge(price: "19.999"))
+
+    assert_equal BigDecimal("20.0"), iphone.reload.price
+  end
 end

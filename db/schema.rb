@@ -14,9 +14,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_24_063330) do
   create_table "iphones", force: :cascade do |t|
     t.string "color"
     t.datetime "created_at", null: false
-    t.string "name"
-    t.decimal "price"
-    t.integer "storage"
+    t.string "name", null: false
+    t.decimal "price", precision: 12, scale: 2, null: false
+    t.integer "storage", null: false
     t.datetime "updated_at", null: false
   end
 end
