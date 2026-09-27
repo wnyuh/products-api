@@ -49,3 +49,5 @@ group :development, :test do
 end
 
 gem "rswag"
+
+gem "pagy", "~> 43.6"
