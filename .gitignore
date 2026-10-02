@@ -35,3 +35,6 @@
 # IDE / Claude session
 /.idea/
 /.claude/session-state/
+/plans/
+/docs/
+/.claude/
