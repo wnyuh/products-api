@@ -56,4 +56,16 @@ class ProductTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "image_url là nil khi chưa có ảnh" do
+    assert_nil Product.create!(valid_attrs).image_url
+  end
+
+  test "image_url là URL tuyệt đối tới ảnh đã attach và có trong JSON" do
+    product = Product.create!(valid_attrs)
+    product.image.attach(io: StringIO.new("fake-jpeg"), filename: "op-lung.jpg", content_type: "image/jpeg")
+
+    assert_match %r{\Ahttp://[^/]+/rails/active_storage/blobs/proxy/.+/op-lung\.jpg\z}, product.image_url
+    assert_equal product.image_url, product.as_json["image_url"]
+  end
 end

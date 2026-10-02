@@ -7,7 +7,7 @@ class ProductsController < ApplicationController
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
-    @products = paginate(sorted(filtered(Product.all)))
+    @products = paginate(sorted(filtered(Product.with_attached_image)))
 
     render json: @products
   end
