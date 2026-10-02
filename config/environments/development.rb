@@ -29,8 +29,18 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # Gửi thư tới Mailtrap (hộp thư ảo, không ra ngoài)
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "sandbox.smtp.mailtrap.io",
+    port: 2525,
+    user_name: Rails.application.credentials.dig(:mailtrap, :user_name),
+    password: Rails.application.credentials.dig(:mailtrap, :password),
+    authentication: :plain
+  }
+
+  # Bật để lỗi gửi thư hiện ra rõ ràng khi test, không im lặng bỏ qua
+  config.action_mailer.raise_delivery_errors = true
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false

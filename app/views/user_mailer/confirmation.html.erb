@@ -1,0 +1,16 @@
+<h2>Xin chào <%= @user.name %>,</h2>
+
+<p>Cảm ơn bạn đã đăng ký tài khoản tại iPhone Shop!</p>
+
+<p>Vui lòng bấm vào liên kết dưới đây để kích hoạt tài khoản của bạn (liên kết có hiệu lực trong 24 giờ):</p>
+
+<p>
+  <a href="<%= @confirmation_url %>" style="display: inline-block; padding: 10px 20px; background-color: #0071e3; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
+    Xác nhận tài khoản của tôi
+  </a>
+</p>
+
+<p>Hoặc bạn có thể sao chép liên kết này vào trình duyệt:</p>
+<p><%= @confirmation_url %></p>
+
+<p>Nếu bạn không thực hiện đăng ký này, xin hãy bỏ qua email này.</p>

@@ -1,4 +1,5 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "from@example.com"
+  # Địa chỉ email người gửi mặc định cho toàn bộ thư trong hệ thống
+  default from: "no-reply@iphone-shop.local"
   layout "mailer"
 end

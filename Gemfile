@@ -13,7 +13,11 @@ gem "json", "< 3"
 # gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+# bcrypt: Mã hóa một chiều (băm) mật khẩu, tuyệt đối không lưu mật khẩu thô vào DB
+gem "bcrypt", "~> 3.1.7"
+
+# jwt: Tạo và kiểm tra "vé vào cổng" điện tử (JSON Web Token) có hạn dùng cho phiên đăng nhập
+gem "jwt"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]

@@ -3,6 +3,14 @@ Rails.application.routes.draw do
   mount Rswag::Api::Engine => "/api-docs"
   resources :iphones
   resources :products
+
+  scope "/auth", controller: :auth do
+    post "register"
+    get "confirm"
+    post "login"
+    get "me" # Lấy thông tin tài khoản hiện tại: GET /auth/me
+    post "logout"
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
