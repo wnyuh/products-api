@@ -52,6 +52,11 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
+group :development do
+  # Tự động mở email trên trình duyệt web ở máy cá nhân khi gửi mail
+  gem "letter_opener"
+end
+
 gem "rswag"
 
 gem "pagy", "~> 43.6"
