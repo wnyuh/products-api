@@ -35,11 +35,7 @@ def attach_image(product, source)
     read_timeout: 25
   )
   content_type = io.content_type || "image/jpeg"
-  ext = case content_type
-        when "image/png"  then "png"
-        when "image/webp" then "webp"
-        else "jpg"
-        end
+  ext = { "image/png" => "png", "image/webp" => "webp" }.fetch(content_type, "jpg")
 
   product.image.attach(
     io: io,
