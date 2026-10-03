@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_100717) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_02_124841) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -39,6 +39,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100717) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "denylisted_tokens", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "exp"
+    t.string "jti"
+    t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_denylisted_tokens_on_jti", unique: true
+  end
+
   create_table "iphones", force: :cascade do |t|
     t.string "color"
     t.datetime "created_at", null: false
@@ -56,6 +64,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100717) do
     t.decimal "price", precision: 12, scale: 2, null: false
     t.datetime "updated_at", null: false
     t.index ["category"], name: "index_products_on_category"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.datetime "confirmation_sent_at"
+    t.string "confirmation_token"
+    t.boolean "confirmed", default: false, null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "name", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
