@@ -155,4 +155,28 @@ class ProductsIndexTest < ActionDispatch::IntegrationTest
     get products_url, params: { min_price: [ 1, 2 ] }, headers: ACCEPT_JSON
     assert_response :bad_request
   end
+
+
+  # --- category trong JSON ---
+  test "mỗi sản phẩm có category (slug) và category_name" do
+    get products_url, params: { sort: "price" }, headers: ACCEPT_JSON
+
+    first = response.parsed_body.first
+    assert_equal "case", first["category"]
+    assert_equal "Ốp lưng", first["category_name"]
+  end
+
+  test "lấy category không bị N+1: số query vào categories không tăng theo số sản phẩm" do
+    assert_equal 1, categories_query_count { get products_url, headers: ACCEPT_JSON }
+  end
+
+  private
+
+  # Đếm số câu SQL đọc bảng categories (kể cả câu được query cache trả lời)
+  def categories_query_count
+    count = 0
+    counter = ->(*, payload) { count += 1 if payload[:sql].include?(%(FROM "categories")) }
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { yield }
+    count
+  end
 end

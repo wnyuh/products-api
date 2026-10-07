@@ -7,7 +7,8 @@ class ProductsController < ApplicationController
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
-    @products = paginate(sorted(filtered(Product.with_attached_image)))
+    # sửa lỗi N + 1 bằng includes
+    @products = paginate(sorted(filtered(Product.with_attached_image.includes(:category))))
 
     render json: @products
   end

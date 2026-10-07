@@ -16,6 +16,10 @@ class Product < ApplicationRecord
 
   # JSON vẫn giữ key image_url như contract cũ để frontend không phải đổi.
   def serializable_hash(options = nil)
-    super.merge("image_url" => image_url)
+    super.merge(
+      "image_url" => image_url,
+      "category" => category.slug,
+      "category_name" => category.name
+    )
   end
 end
