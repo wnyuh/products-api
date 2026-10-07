@@ -7,9 +7,6 @@ require "cgi"
 
 puts "🚀 Bắt đầu cập nhật dữ liệu và hình ảnh sản phẩm (Seed database)..."
 
-has_category_model  = defined?(Category) && Category.respond_to?(:find_or_create_by!)
-has_category_id_col = Product.column_names.include?("category_id")
-has_category_col    = Product.column_names.include?("category")
 has_image_url_col   = Product.column_names.include?("image_url")
 
 # Chuẩn hoá slug danh mục theo validation /\A[a-z][a-z0-9_]*\z/
@@ -255,12 +252,8 @@ catalog_data = {
 total_products = 0
 
 catalog_data.each do |cat_name, products|
-  category_record = nil
-  if has_category_model
-    category_record = Category.find_or_create_by!(name: cat_name)
-  end
-
   category_slug = CATEGORY_SLUGS[cat_name] || cat_name.parameterize.underscore
+  category_record = Category.find_or_create_by!(slug: category_slug) { |c| c.name = cat_name }
   puts "\n📁 [Danh mục] #{cat_name}"
 
   products.each do |prod_attrs|
@@ -268,8 +261,7 @@ catalog_data.each do |cat_name, products|
     product.price = prod_attrs[:price]
     product.description = prod_attrs[:description]
 
-    product.category_id = category_record.id if has_category_id_col && category_record
-    product.category    = category_slug if has_category_col
+    product.category = category_record
 
     # Nếu có cột image_url trong bảng Product, cập nhật luôn URL gốc
     if has_image_url_col

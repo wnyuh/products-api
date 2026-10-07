@@ -43,9 +43,12 @@ class ProductsController < ApplicationController
   end
 
   private
-  # Dùng lại chuẩn hóa của model để ?category=%20CASE khớp với "case" đã lưu
+  # Dùng lại chuẩn hóa của Category để ?category=%20CASE khớp với slug "case" đã lưu
   def filtered(scope)
-    scope = scope.where(category: Product.normalize_value_for(:category, params[:category].to_s)) if params[:category].present?
+    if params[:category].present?
+      slug = Category.normalize_value_for(:slug, params[:category].to_s)
+      scope = scope.joins(:category).where(categories: { slug: slug })
+    end
     scope = scope.where(price: decimal_param(:min_price)..) if params[:min_price].present?
     scope = scope.where(price: ..decimal_param(:max_price)) if params[:max_price].present?
     scope
@@ -57,9 +60,11 @@ class ProductsController < ApplicationController
       name = field.delete_prefix("-")
       raise ActionController::BadRequest, "sort: '#{name}' is not sortable" unless SORTABLE_FIELDS.include?(name)
 
-      { name => field.start_with?("-") ? :desc : :asc }
+      direction = field.start_with?("-") ? :desc : :asc
+      name == "category" ? Category.arel_table[:slug].public_send(direction) : { name => direction }
     end
 
+    scope = scope.joins(:category) if order.any? { |o| o.is_a?(Arel::Nodes::Ordering) }
     scope.order(*order, :id)
   end
 
@@ -77,6 +82,6 @@ class ProductsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def product_params
-    params.expect(product: [ :name, :price, :category, :description ])
+    params.expect(product: [ :name, :price, :category_id, :description ])
   end
 end

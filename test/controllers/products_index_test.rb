@@ -8,11 +8,11 @@ class ProductsIndexTest < ActionDispatch::IntegrationTest
   setup do
     Product.delete_all
     [
-      { name: "Ốp trong suốt 13", price: 100_000, category: "case" },
-      { name: "Ốp chống sốc 14", price: 200_000, category: "case" },
-      { name: "Sạc nhanh 20W", price: 500_000, category: "charger" },
-      { name: "Cáp USB-C 1m", price: 150_000, category: "cable" },
-      { name: "Sạc không dây", price: 700_000, category: "charger" }
+      { name: "Ốp trong suốt 13", price: 100_000, category: categories(:case) },
+      { name: "Ốp chống sốc 14", price: 200_000, category: categories(:case) },
+      { name: "Sạc nhanh 20W", price: 500_000, category: categories(:charger) },
+      { name: "Cáp USB-C 1m", price: 150_000, category: categories(:cable) },
+      { name: "Sạc không dây", price: 700_000, category: categories(:charger) }
     ].each { |attrs| Product.create!(attrs) }
   end
 
