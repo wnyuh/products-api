@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   mount Rswag::Api::Engine => "/api-docs"
   resources :iphones
   resources :products
+  resources :categories
 
   scope "/auth", controller: :auth do
     post "register"
