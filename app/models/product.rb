@@ -1,9 +1,11 @@
 class Product < ApplicationRecord
   has_one_attached :image
   belongs_to :category
-  delegate :slug, :name, to: :category
+  # Sử dụng delegation: tạo method slug/name trực tiếp thuộc Product
+  # nhờ delegation, chúng ta có thể gọi slug/name thay vì category.slug/category.name
+  # prefix: true tạo category_slug, category_name (không đè Product#name)
+  delegate :slug, :name, to: :category, prefix: true
 
-  # Chuẩn hóa trước khi validate để "Case " và "case" là cùng một category
   normalizes :name, with: ->(value) { value.strip }
 
   validates :name, presence: true, length: { maximum: 100 }
@@ -16,9 +18,11 @@ class Product < ApplicationRecord
   end
 
   # JSON vẫn giữ key image_url như contract cũ để frontend không phải đổi.
-  super.merge(
-    "image_url" => image_url,
-    "category" => slug,
-    "category_name" => name
-  )
+  def serializable_hash(options = nil)
+    super.merge(
+      "image_url" => image_url,
+      "category" => category_slug,
+      "category_name" => category_name
+    )
+  end
 end
