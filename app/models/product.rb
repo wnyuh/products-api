@@ -1,6 +1,7 @@
 class Product < ApplicationRecord
   has_one_attached :image
   belongs_to :category
+  delegate :slug, :name, to: :category
 
   # Chuẩn hóa trước khi validate để "Case " và "case" là cùng một category
   normalizes :name, with: ->(value) { value.strip }
@@ -15,11 +16,9 @@ class Product < ApplicationRecord
   end
 
   # JSON vẫn giữ key image_url như contract cũ để frontend không phải đổi.
-  def serializable_hash(options = nil)
-    super.merge(
-      "image_url" => image_url,
-      "category" => category.slug,
-      "category_name" => category.name
-    )
-  end
+  super.merge(
+    "image_url" => image_url,
+    "category" => slug,
+    "category_name" => name
+  )
 end
