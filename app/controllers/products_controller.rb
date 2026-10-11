@@ -7,9 +7,16 @@ class ProductsController < ApplicationController
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
-    # sửa lỗi N + 1 bằng includes
-    @products = paginate(sorted(filtered(Product.with_attached_image.includes(:category))))
+    # Khởi tạo query gốc: Tải trước (preload) ảnh và danh mục để chặn lỗi N+1 query
+    scope = Product.with_attached_image.includes(:category)
 
+    # Kế thừa query ở trên, tìm các sản phẩm có tên chứa từ khóa params[:q]
+    scope = scope.ransack(name_search_cont: Product.fold(params[:q])).result
+
+    # Áp dụng các bộ lọc, sắp xếp, và cuối cùng mới cắt trang (paginate)
+    @products = paginate(sorted(filtered(scope)))
+
+    # Trả về kết quả JSON cho frontend
     render json: @products
   end
 

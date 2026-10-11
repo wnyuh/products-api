@@ -170,6 +170,17 @@ class ProductsIndexTest < ActionDispatch::IntegrationTest
     assert_equal 1, categories_query_count { get products_url, headers: ACCEPT_JSON }
   end
 
+  test "tìm kiếm theo tên bằng q" do
+    get products_url, params: { q: "Sạc" }, headers: ACCEPT_JSON
+    assert_response :success
+    assert_equal [ "Sạc nhanh 20W", "Sạc không dây" ], names
+  end
+
+  test "tìm không dấu vẫn khớp tên có dấu" do
+    get products_url, params: { q: "sac" }, headers: ACCEPT_JSON
+    assert_equal [ "Sạc nhanh 20W", "Sạc không dây" ], names
+  end
+
   private
 
   # Đếm số câu SQL đọc bảng categories (kể cả câu được query cache trả lời)

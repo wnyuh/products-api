@@ -62,3 +62,5 @@ end
 gem "rswag"
 
 gem "pagy", "~> 43.6"
+
+gem "ransack"

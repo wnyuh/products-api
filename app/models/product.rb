@@ -25,4 +25,21 @@ class Product < ApplicationRecord
       "category_name" => category_name
     )
   end
+
+  # Bỏ dấu, đổi đ→d, viết thường: "Điện thoại" → "dien thoai"
+  def self.fold(text)
+    text.to_s.unicode_normalize(:nfd).gsub(/\p{Mn}/, "").tr("đĐ", "dD").downcase.strip
+  end
+
+  before_save { self.name_search = Product.fold(name) }
+
+  # Chỉ định các cột trong database được phép dùng để tìm kiếm (bảo mật của Ransack)
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[name_search] # Chỉ cho phép search qua cột đã bỏ dấu
+  end
+
+  # Chỉ định các bảng liên kết (associations) được phép join vào để tìm kiếm
+  def self.ransackable_associations(_auth_object = nil)
+    [] # Trả về mảng rỗng: Không cho phép tìm kiếm chéo qua bất kỳ bảng liên kết nào
+  end
 end
