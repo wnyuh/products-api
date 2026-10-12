@@ -7,8 +7,16 @@ class ProductsController < ApplicationController
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
-    @products = paginate(sorted(filtered(Product.with_attached_image)))
+    # Khởi tạo query gốc: Tải trước (preload) ảnh và danh mục để chặn lỗi N+1 query
+    scope = Product.with_attached_image.includes(:category)
 
+    # Kế thừa query ở trên, tìm các sản phẩm có tên chứa từ khóa params[:q]
+    scope = scope.ransack(name_search_cont: Product.fold(params[:q])).result
+
+    # Áp dụng các bộ lọc, sắp xếp, và cuối cùng mới cắt trang (paginate)
+    @products = paginate(sorted(filtered(scope)))
+
+    # Trả về kết quả JSON cho frontend
     render json: @products
   end
 
@@ -43,9 +51,12 @@ class ProductsController < ApplicationController
   end
 
   private
-  # Dùng lại chuẩn hóa của model để ?category=%20CASE khớp với "case" đã lưu
+  # Dùng lại chuẩn hóa của Category để ?category=%20CASE khớp với slug "case" đã lưu
   def filtered(scope)
-    scope = scope.where(category: Product.normalize_value_for(:category, params[:category].to_s)) if params[:category].present?
+    if params[:category].present?
+      slug = Category.normalize_value_for(:slug, params[:category].to_s)
+      scope = scope.joins(:category).where(categories: { slug: slug })
+    end
     scope = scope.where(price: decimal_param(:min_price)..) if params[:min_price].present?
     scope = scope.where(price: ..decimal_param(:max_price)) if params[:max_price].present?
     scope
@@ -57,9 +68,11 @@ class ProductsController < ApplicationController
       name = field.delete_prefix("-")
       raise ActionController::BadRequest, "sort: '#{name}' is not sortable" unless SORTABLE_FIELDS.include?(name)
 
-      { name => field.start_with?("-") ? :desc : :asc }
+      direction = field.start_with?("-") ? :desc : :asc
+      name == "category" ? Category.arel_table[:slug].public_send(direction) : { name => direction }
     end
 
+    scope = scope.joins(:category) if order.any? { |o| o.is_a?(Arel::Nodes::Ordering) }
     scope.order(*order, :id)
   end
 
@@ -77,6 +90,6 @@ class ProductsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def product_params
-    params.expect(product: [ :name, :price, :category, :description ])
+    params.expect(product: [ :name, :price, :category_id, :description ])
   end
 end

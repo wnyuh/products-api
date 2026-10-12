@@ -12,7 +12,7 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
 
   test "should create product" do
     assert_difference("Product.count") do
-      post products_url, params: { product: { category: @product.category, description: @product.description, name: @product.name, price: @product.price } }, as: :json
+      post products_url, params: { product: { category_id: @product.category_id, description: @product.description, name: @product.name, price: @product.price } }, as: :json
     end
 
     assert_response :created
@@ -24,7 +24,7 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update product" do
-    patch product_url(@product), params: { product: { category: @product.category, description: @product.description, name: @product.name, price: @product.price } }, as: :json
+    patch product_url(@product), params: { product: { category_id: @product.category_id, description: @product.description, name: @product.name, price: @product.price } }, as: :json
     assert_response :success
   end
 
@@ -38,7 +38,7 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
 
   test "create với dữ liệu sai trả 422 và không tạo bản ghi" do
     assert_no_difference("Product.count") do
-      post products_url, params: { product: { name: "", price: "abc", category: "Ốp lưng" } }, as: :json
+      post products_url, params: { product: { name: "", price: "abc", category_id: 0 } }, as: :json
     end
 
     assert_response :unprocessable_content
@@ -48,11 +48,11 @@ class ProductsControllerTest < ActionDispatch::IntegrationTest
     assert errors.key?("category")
   end
 
-  test "create chuẩn hóa category về chữ thường" do
-    post products_url, params: { product: { name: "Cáp USB-C", price: 120_000, category: "  Cable " } }, as: :json
+  test "create gán đúng category theo category_id" do
+    post products_url, params: { product: { name: "Cáp USB-C", price: 120_000, category_id: categories(:cable).id } }, as: :json
 
     assert_response :created
-    assert_equal "cable", response.parsed_body["category"]
+    assert_equal categories(:cable).id, response.parsed_body["category_id"]
   end
 
   test "update với dữ liệu sai trả 422 và giữ nguyên bản ghi" do
