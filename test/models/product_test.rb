@@ -2,7 +2,7 @@ require "test_helper"
 
 class ProductTest < ActiveSupport::TestCase
   def valid_attrs
-    { name: "Ốp lưng iPhone 15 Pro", price: 350_000, category: "case", description: "Ốp trong suốt" }
+    { name: "Ốp lưng iPhone 15 Pro", price: 350_000, category: categories(:case), description: "Ốp trong suốt" }
   end
 
   test "hợp lệ với dữ liệu đầy đủ" do
@@ -21,20 +21,13 @@ class ProductTest < ActiveSupport::TestCase
     end
   end
 
-  test "category bắt buộc, chữ thường/số/gạch dưới, bắt đầu bằng chữ, tối đa 30 ký tự" do
-    [ nil, "", "   ", "9case", "a b", "a-b", "ốp", "a" * 31 ].each do |bad|
-      assert_not Product.new(valid_attrs.merge(category: bad)).valid?, "category=#{bad.inspect} phải bị từ chối"
-    end
-    %w[ case charger screen_protector usb_c2 ].each do |good|
-      assert Product.new(valid_attrs.merge(category: good)).valid?, "category=#{good.inspect} phải hợp lệ"
-    end
+  test "category bắt buộc và phải tồn tại" do
+    assert_not Product.new(valid_attrs.merge(category: nil)).valid?
+    assert_not Product.new(valid_attrs.merge(category: nil, category_id: 0)).valid?
   end
 
-  test "category được chuẩn hóa về chữ thường, bỏ khoảng trắng thừa" do
-    product = Product.new(valid_attrs.merge(category: "  Case "))
-
-    assert_equal "case", product.category
-    assert product.valid?
+  test "product thuộc về đúng category" do
+    assert_equal categories(:case), Product.new(valid_attrs).category
   end
 
   test "name được bỏ khoảng trắng đầu cuối" do
@@ -49,8 +42,8 @@ class ProductTest < ActiveSupport::TestCase
     assert Product.new(valid_attrs.merge(price: "9999999999.99")).valid?
   end
 
-  test "DB từ chối name, price, category NULL dù bỏ qua validation" do
-    %i[ name price category ].each do |column|
+  test "DB từ chối name, price, category_id NULL dù bỏ qua validation" do
+    %i[ name price category_id ].each do |column|
       assert_raises(ActiveRecord::NotNullViolation, "#{column} NULL phải bị DB từ chối") do
         Product.new(valid_attrs.merge(column => nil)).save!(validate: false)
       end

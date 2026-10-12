@@ -1,0 +1,11 @@
+case:
+  name: Ốp lưng
+  slug: case
+
+charger:
+  name: Củ sạc
+  slug: charger
+
+cable:
+  name: Cáp sạc
+  slug: cable
