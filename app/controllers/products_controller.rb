@@ -13,7 +13,7 @@ class ProductsController < ApplicationController
     scope = Product.with_attached_image.includes(:category)
 
     # Kế thừa query ở trên, tìm các sản phẩm có tên chứa từ khóa params[:q]
-    scope = scope.ransack(name_search_cont: Product.fold(params[:q])).result
+    scope = searched(scope)
 
     # Áp dụng các bộ lọc, sắp xếp, và cuối cùng mới cắt trang (paginate)
     @products = paginate(sorted(filtered(scope)))
@@ -22,10 +22,12 @@ class ProductsController < ApplicationController
     render json: @products
   end
 
-  # GET /products/export: tải toàn bộ sản phẩm dưới dạng CSV
-  # Lọc theo params sẽ thêm ở 1c; hiện tại xuất tất cả
+  # GET /products/export?category=&min_price=&max_price=&q=
+  # Áp dụng cùng bộ lọc với index, nhưng không sort và không phân trang
   def export
-    send_data ProductCsvExporter.new.call,
+    scope = filtered(searched(Product.all))
+
+    send_data ProductCsvExporter.new(scope).call,
               filename: "products-#{Date.current}.csv", # tên file có ngày, ví dụ products-2026-10-13.csv
               type: "text/csv; charset=utf-8"           # MIME type để trình duyệt hiểu đây là CSV
   end
@@ -70,6 +72,11 @@ class ProductsController < ApplicationController
     scope = scope.where(price: decimal_param(:min_price)..) if params[:min_price].present?
     scope = scope.where(price: ..decimal_param(:max_price)) if params[:max_price].present?
     scope
+  end
+
+  # Tìm theo tên không phân biệt dấu. Dùng chung cho index và export
+  def searched(scope)
+    scope.ransack(name_search_cont: Product.fold(params[:q])).result
   end
 
   # sort=-price,name: dấu "-" là giảm dần. Luôn thêm id để thứ tự ổn định khi phân trang.

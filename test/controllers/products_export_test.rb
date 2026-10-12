@@ -29,4 +29,36 @@ class ProductsExportTest < ActionDispatch::IntegrationTest
     assert_equal ProductCsvExporter::HEADERS, body.headers
     assert_equal Product.count, body.size
   end
+
+  # Lấy các dòng CSV từ response (bỏ BOM trước khi parse)
+  def csv_rows
+    CSV.parse(response.body.delete_prefix(ProductCsvExporter::BOM), headers: true)
+  end
+
+  test "lọc theo category giống index" do
+    get export_products_url, params: { category: "case" }, headers: @auth
+
+    assert_equal [ "case" ], csv_rows.map { |r| r["category"] }
+  end
+
+  test "lọc theo khoảng giá giống index" do
+    get export_products_url, params: { max_price: 400_000 }, headers: @auth
+    assert_equal [ products(:one).id.to_s ], csv_rows.map { |r| r["id"] }
+
+    get export_products_url, params: { min_price: 400_000 }, headers: @auth
+    assert_equal [ products(:two).id.to_s ], csv_rows.map { |r| r["id"] }
+  end
+
+  test "tìm theo q không phân biệt dấu giống index" do
+    products(:two).save! # fixture không chạy before_save nên name_search còn NULL; save! để điền name_search
+    get export_products_url, params: { q: "Sạc" }, headers: @auth
+
+    assert_equal [ products(:two).id.to_s ], csv_rows.map { |r| r["id"] }
+  end
+
+  test "tham số lọc không hợp lệ trả 400" do
+    get export_products_url, params: { min_price: "abc" }, headers: @auth
+
+    assert_response :bad_request
+  end
 end
