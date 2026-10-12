@@ -1,9 +1,11 @@
 class ProductsController < ApplicationController
   include Paginatable
+  include Authenticatable
 
   SORTABLE_FIELDS = %w[ name price category created_at ].freeze
 
   before_action :set_product, only: %i[ show update destroy ]
+  before_action :authenticate_user!, only: %i[ export ] # export cần đăng nhập, index thì không
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
@@ -18,6 +20,14 @@ class ProductsController < ApplicationController
 
     # Trả về kết quả JSON cho frontend
     render json: @products
+  end
+
+  # GET /products/export: tải toàn bộ sản phẩm dưới dạng CSV
+  # Lọc theo params sẽ thêm ở 1c; hiện tại xuất tất cả
+  def export
+    send_data ProductCsvExporter.new.call,
+              filename: "products-#{Date.current}.csv", # tên file có ngày, ví dụ products-2026-10-13.csv
+              type: "text/csv; charset=utf-8"           # MIME type để trình duyệt hiểu đây là CSV
   end
 
   # GET /products/1
