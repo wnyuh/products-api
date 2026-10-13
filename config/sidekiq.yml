@@ -1,0 +1,5 @@
+# Sidekiq đọc file này khi khởi động. Phải liệt kê queue "exports" thì job mới được xử lý.
+:concurrency: 5
+:queues:
+  - exports
+  - default
