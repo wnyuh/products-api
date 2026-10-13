@@ -6,17 +6,18 @@ class ProductsController < ApplicationController
 
   before_action :set_product, only: %i[ show update destroy ]
   before_action :authenticate_user!, only: %i[ export ] # export cần đăng nhập, index thì không
+  # lỗi tham số lọc trả 400 JSON thay vì lỗi 500
+  rescue_from ProductFilter::InvalidParam do |error|
+    render json: { error: error.message }, status: :bad_request
+  end
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
     # Khởi tạo query gốc: Tải trước (preload) ảnh và danh mục để chặn lỗi N+1 query
     scope = Product.with_attached_image.includes(:category)
 
-    # Kế thừa query ở trên, tìm các sản phẩm có tên chứa từ khóa params[:q]
-    scope = searched(scope)
-
-    # Áp dụng các bộ lọc, sắp xếp, và cuối cùng mới cắt trang (paginate)
-    @products = paginate(sorted(filtered(scope)))
+    # lọc qua ProductFilter, sau đó sort và phân trang
+    @products = paginate(sorted(product_filter.call(scope)))
 
     # Trả về kết quả JSON cho frontend
     render json: @products
@@ -25,7 +26,7 @@ class ProductsController < ApplicationController
   # GET /products/export?category=&min_price=&max_price=&q=
   # Áp dụng cùng bộ lọc với index, nhưng không sort và không phân trang
   def export
-    scope = filtered(searched(Product.all))
+    scope = product_filter.call
 
     send_data ProductCsvExporter.new(scope).call,
               filename: "products-#{Date.current}.csv", # tên file có ngày, ví dụ products-2026-10-13.csv
@@ -63,20 +64,15 @@ class ProductsController < ApplicationController
   end
 
   private
-  # Dùng lại chuẩn hóa của Category để ?category=%20CASE khớp với slug "case" đã lưu
-  def filtered(scope)
-    if params[:category].present?
-      slug = Category.normalize_value_for(:slug, params[:category].to_s)
-      scope = scope.joins(:category).where(categories: { slug: slug })
-    end
-    scope = scope.where(price: decimal_param(:min_price)..) if params[:min_price].present?
-    scope = scope.where(price: ..decimal_param(:max_price)) if params[:max_price].present?
-    scope
-  end
 
-  # Tìm theo tên không phân biệt dấu. Dùng chung cho index và export
-  def searched(scope)
-    scope.ransack(name_search_cont: Product.fold(params[:q])).result
+  # Đọc params một lần ở controller rồi truyền vào ProductFilter
+  def product_filter
+    ProductFilter.new(
+      q: params[:q],
+      category: params[:category],
+      min_price: params[:min_price],
+      max_price: params[:max_price]
+    )
   end
 
   # sort=-price,name: dấu "-" là giảm dần. Luôn thêm id để thứ tự ổn định khi phân trang.
@@ -91,13 +87,6 @@ class ProductsController < ApplicationController
 
     scope = scope.joins(:category) if order.any? { |o| o.is_a?(Arel::Nodes::Ordering) }
     scope.order(*order, :id)
-  end
-
-  def decimal_param(key)
-    value = BigDecimal(params[key].to_s, exception: false)
-    raise ActionController::BadRequest, "#{key} must be a finite number" unless value&.finite?
-
-    value
   end
 
   # Use callbacks to share common setup or constraints between actions.
