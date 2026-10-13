@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       get :export
     end
   end
+  resources :product_exports, only: %i[ create show ] # POST tạo export, GET theo dõi
   resources :categories
 
   scope "/auth", controller: :auth do
