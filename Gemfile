@@ -50,4 +50,4 @@ end
 
 gem "rswag"
 
-gem "pagy", "~> 43.6"
+gem "pagy", "~> 43.7"
