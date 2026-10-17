@@ -66,5 +66,3 @@ gem "pagy", "~> 43.6"
 gem "ransack"
 
 gem "csv"
-
-gem "sidekiq", "~> 8.1"
