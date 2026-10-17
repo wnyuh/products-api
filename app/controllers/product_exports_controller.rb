@@ -4,11 +4,6 @@ class ProductExportsController < ApplicationController
 
   before_action :authenticate_user!
 
-  # Lỗi tham số lọc trả 400 ngay tại request, không tạo bản ghi
-  rescue_from ProductFilter::InvalidParam do |error|
-    render json: { error: error.message }, status: :bad_request
-  end
-
   # POST /product_exports
   def create
     filters = filter_params.to_h.symbolize_keys

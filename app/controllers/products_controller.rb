@@ -6,10 +6,6 @@ class ProductsController < ApplicationController
 
   before_action :set_product, only: %i[ show update destroy ]
   before_action :authenticate_user!, only: %i[ export ] # export cần đăng nhập, index thì không
-  # lỗi tham số lọc trả 400 JSON thay vì lỗi 500
-  rescue_from ProductFilter::InvalidParam do |error|
-    render json: { error: error.message }, status: :bad_request
-  end
 
   # GET /products?category=&min_price=&max_price=&sort=-price,name&page=&per_page=
   def index
