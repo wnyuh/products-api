@@ -2,7 +2,12 @@ Rails.application.routes.draw do
   mount Rswag::Ui::Engine => "/api-docs"
   mount Rswag::Api::Engine => "/api-docs"
   resources :iphones
-  resources :products
+  resources :products do
+    collection do
+      get :export
+    end
+  end
+  resources :product_exports, only: %i[ create show ] # POST tạo export, GET theo dõi
   resources :categories
 
   scope "/auth", controller: :auth do

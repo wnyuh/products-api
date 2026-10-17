@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_secure_password
+  has_many :product_exports, dependent: :destroy
 
   normalizes :email, with: ->(value) { value.strip.downcase }
   normalizes :name, with: ->(value) { value.strip }
