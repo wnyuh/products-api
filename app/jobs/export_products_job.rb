@@ -24,7 +24,7 @@ class ExportProductsJob < ApplicationJob
   rescue StandardError => e
     # export có thể là nil nếu find đã lỗi, nên dùng &.
     export&.mark_failed!(e.message)
-    # Báo lại để Sidekiq retry. Không return vì sẽ coi job là thành công và không bao giờ thử lại
+    # Báo lại để Active Job retry. Không return vì sẽ coi job là thành công và không bao giờ thử lại
     raise
   end
 end
